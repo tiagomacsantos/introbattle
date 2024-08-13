@@ -24,7 +24,7 @@ background = pygame.transform.scale(background, (1024, 768))
 
 while run:
     #desenha a imagem de fundo do jogo
-    win.blit(background, (0 ,0))
+    win.blit(background, (0, 0))
     clock.tick(fps)
 
     for event in pygame.event.get():
@@ -33,8 +33,10 @@ while run:
             run = False
 
     if menu_principal:
-        interface.desenha_menu(win)
-
+        menu_principal = interface.desenha_menu(win)
+    #else:
+        #menu_principal = interface.desenha_jogo(win)
+    
     #atualiza o display da tela
     pygame.display.flip()
 
