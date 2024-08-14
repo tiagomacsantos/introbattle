@@ -16,7 +16,7 @@ class Window():
     def get_color(self):
         return self.color
     
-# FALTA DESENHAR OS PERSONAGENS
+# FALTA FAZER E DESENHAR A LOGICA DA SETA E ESCREVER OS NOMES DOS BONECOS
 def desenha_menu(janela):
     #Titulo do introbattle
     fonte = pygame.font.Font('freesansbold.ttf', 50) #Declaracao da fonte
@@ -59,11 +59,11 @@ def desenha_menu(janela):
     botao_personagem = pygame.image.load("./imgs/UI/introcomp_menu.png")
     botao_personagem = pygame.transform.scale(botao_personagem, botao_tamanho)
     botao_posicoes = [
-        (-200, -50),
-        (87, -50),
-        (374, -50),
-        (-53, 200),
-        (234, 200),
+        (-200, -50), #paladin
+        (87, -50), #rogue
+        (374, -50), #wizard
+        (-53, 200), #hunter
+        (234, 200), #priest
     ]
 
     
