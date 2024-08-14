@@ -27,13 +27,17 @@ while run:
     win.blit(background, (0, 0))
     clock.tick(fps)
 
-    for event in pygame.event.get():
+    eventos = pygame.event.get()
+
+    for event in eventos:
         #avalia se a janela foi fechada
         if event.type == pygame.QUIT:
             run = False
 
+    escolhas = []
+
     if menu_principal:
-        menu_principal = interface.desenha_menu(win)
+        menu_principal, escolhas = interface.desenha_menu(win, eventos)
     #else:
         #menu_principal = interface.desenha_jogo(win)
     
