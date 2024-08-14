@@ -24,7 +24,7 @@ def escolhe_personagem(escolhas, seta_posicoes, indice_seta, eventos):
                 indice_seta += 1
             elif event.key == pygame.K_LEFT:
                 indice_seta -= 1
-            elif event.key == pygame.K_RETURN:
+            elif event.key == pygame.K_z:
                 if indice_seta not in escolhas:
                     escolhas.append(indice_seta)
 
