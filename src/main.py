@@ -22,6 +22,9 @@ fps = 60
 background = pygame.image.load("./imgs/background/teste3ps.png")
 background = pygame.transform.scale(background, (1024, 768))
 
+#Escolhas do jogador
+escolhas = []
+
 while run:
     #desenha a imagem de fundo do jogo
     win.blit(background, (0, 0))
@@ -34,12 +37,10 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
-    escolhas = []
-
     if menu_principal:
         menu_principal, escolhas = interface.desenha_menu(win, eventos)
-    #else:
-        #menu_principal = interface.desenha_jogo(win)
+    else:
+        menu_principal = interface.desenha_jogo(win, eventos, escolhas)
     
     #atualiza o display da tela
     pygame.display.flip()

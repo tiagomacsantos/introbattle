@@ -164,3 +164,51 @@ def desenha_menu(janela, eventos):
         return False, desenha_menu.escolhas
     
     return True, desenha_menu.escolhas
+
+def desenha_jogo(janela, eventos, escolhas):
+
+    # Carregamento das imagens de UI
+    menu_acoes_tamanho = (700, 300)
+    menu_acoes = pygame.image.load("./imgs/UI/introcomp_menu_cortado2.png")
+    menu_acoes = pygame.transform.scale(menu_acoes, menu_acoes_tamanho)
+
+    menu_info_tamanho = (360, 300)
+    menu_info = pygame.image.load("./imgs/UI/introcomp_menu_cortado2.png")
+    menu_info = pygame.transform.scale(menu_info, menu_info_tamanho)
+
+    #Carregamento dos personagens
+    personagens_lista = [
+        pygame.image.load("./imgs/personagens/paladin.png"), #paladin
+        pygame.image.load("./imgs/personagens/rogue.png"),   #rogue
+        pygame.image.load("./imgs/personagens/wizard.png"),  #wizard
+        pygame.image.load("./imgs/personagens/hunter.png"),  #hunter
+        pygame.image.load("./imgs/personagens/priest.png"),  #priest
+    ]
+    personagens_lista[2] = pygame.transform.flip(personagens_lista[2], True, False) #Invertendo a imagem
+
+    personagens_escolhidos = []
+
+    for j in range(5): #Passando as sprites dos personagens que foram escolhidos para uma nova lista
+        if j in escolhas:
+            personagens_escolhidos.append(personagens_lista[j])
+
+    personagem_tamanho = (100, 100)
+
+    personagem_posicoes = [
+        (300, 150),
+        (200, 250),
+        (300, 350),
+    ]
+
+
+    #Desenhos na tela
+    janela.blit(menu_acoes, (0, 450))
+    janela.blit(menu_info, (665, 450))
+
+    for i in range(3):
+        personagem_escolhido = pygame.transform.scale(personagens_escolhidos[i], personagem_tamanho)
+        janela.blit(personagem_escolhido, personagem_posicoes[i])
+
+    return False
+
+    
