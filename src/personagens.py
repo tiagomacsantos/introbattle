@@ -45,6 +45,9 @@ class Personagem(pygame.sprite.Sprite):
     def get_image(self):
         return self.image
     
+    def get_max_vida(self):
+        return self.vida_inicial
+    
     def desenha_personagem(self, janela):
         self.image = pygame.transform.scale(self.image, (100, 100))
         janela.blit(self.image, self.posicao)
@@ -52,28 +55,40 @@ class Personagem(pygame.sprite.Sprite):
 class Paladin(Personagem):
     def __init__(self):
         super().__init__(vida=150, vida_inicial=150, ataque=30, defesa=40, velocidade=20, image=pygame.image.load("./imgs/personagens/paladin.png"), posicao=(0, 0))
+    
+    def get_nome(self):
+        return "PALADIN"
         
 
 class Rogue(Personagem):
     def __init__(self):
         super().__init__(vida=100, vida_inicial=100, ataque=45, defesa=20, velocidade=40, image=pygame.image.load("./imgs/personagens/rogue.png"), posicao=(0, 0))
         
+    def get_nome(self):
+        return "ROGUE"
 
 class Wizard(Personagem):
     def __init__(self):
         super().__init__(vida=80, vida_inicial=80, ataque=50, defesa=15, velocidade=25, image=pygame.image.load("./imgs/personagens/wizard.png"), posicao=(0, 0))
         self.image = pygame.transform.flip(self.image, True, False) #Invertendo a imagem do wizard
-        
+
+    def get_nome(self):
+        return "WIZARD"    
 
 class Hunter(Personagem):
     def __init__(self):
         super().__init__(vida=110, vida_inicial=110, ataque=35, defesa=25, velocidade=35, image=pygame.image.load("./imgs/personagens/hunter.png"), posicao=(0, 0))
-        
+    
+    def get_nome(self):
+        return "HUNTER"
 
 class Priest(Personagem):
     def __init__(self):
         super().__init__(vida=90, vida_inicial=90, ataque=20, defesa=30, velocidade=30, image=pygame.image.load("./imgs/personagens/priest.png"), posicao=(0, 0))
 
+    def get_nome(self):
+        return "PRIEST"
+    
 class Inimigo(Personagem):
     def __init__(self, vida, vida_inicial, ataque, defesa, velocidade, image):
         super().__init__(vida, vida_inicial, ataque, defesa, velocidade, image, posicao=(0, 0))

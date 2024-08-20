@@ -41,6 +41,27 @@ def escolhe_personagem(escolhas, seta_posicoes, indice_seta, eventos):
 
     return escolhas, indice_seta
 
+def escolhe_acao(seta_posicoes_acoes, indice_seta, eventos):
+    acao_escolhida = None
+    
+    # Verifica pressionamento de teclas
+    for event in eventos:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                indice_seta += 1  # Move para a direita
+            elif event.key == pygame.K_LEFT:
+                indice_seta -= 1  # Move para a esquerda
+            elif event.key == pygame.K_z:
+                acao_escolhida = indice_seta  # Seleciona a ação atual
+
+    # Mantém o índice da seta dentro dos limites
+    if indice_seta < 0:
+        indice_seta = len(seta_posicoes_acoes) - 1  # Vai para a última ação
+    elif indice_seta >= len(seta_posicoes_acoes):
+        indice_seta = 0  # Volta para a primeira ação
+
+    return acao_escolhida, indice_seta
+
 def desenha_menu(janela, eventos):
     # Título do introbattle
     fonte = pygame.font.Font('freesansbold.ttf', 50)  # Declaração da fonte
@@ -176,31 +197,6 @@ def desenha_jogo(janela, eventos, escolhas):
     menu_info = pygame.image.load("./imgs/UI/introcomp_menu_cortado2.png")
     menu_info = pygame.transform.scale(menu_info, menu_info_tamanho)
 
-    #Fontes do menu UI
-    fonte = pygame.font.Font('freesansbold.ttf', 30)
-    texto_ataque = fonte.render("ATACAR", True, (255, 255, 255))
-    texto_defesa = fonte.render("DEFENDER", True, (255, 255, 255))
-    texto_skill = fonte.render("SKILL", True, (255, 255, 255))
-    texto_insight = fonte.render("INSIGHT", True, (255, 255, 255))
-
-    textos = [
-        texto_ataque,
-        texto_defesa,
-        texto_insight,
-        texto_skill,
-    ]
-
-    #MEXER AQUI PELO AMOR DE DEUS
-    textos_posicoes = [
-        (170, 550),
-        (370, 550),
-        (170, 650),
-        (370, 650),
-    ]
-
-    for i in range(4):
-        janela.blit(textos[i], textos_posicoes[i])
-
     #Instanciando os objetos dos personagens e suas respectivas classes
     personagem_posicoes = [
         (300, 150),
@@ -235,12 +231,87 @@ def desenha_jogo(janela, eventos, escolhas):
     inimigo1 = desenha_jogo.inimigo1
     inimigo2 = desenha_jogo.inimigo2
 
+    #Fonte do menu UI
+    fonte = pygame.font.Font('freesansbold.ttf', 30)
+
+    textos_acoes = [
+        fonte.render("ATACAR", True, (255, 255, 255)),
+        fonte.render("DEFENDER", True, (255, 255, 255)),
+    ]
+    #Bordas
+    textos_acoes2 = [
+        fonte.render("ATACAR", True, (0, 0, 0)),
+        fonte.render("DEFENDER", True, (0, 0, 0)),
+    ]
+
+    #MEXER AQUI PELO AMOR DE DEUS
+    textos_posicoes_acoes = [
+        (150, 590),
+        (350, 590),
+    ]
+    #Bordas
+    textos_posicoes_acoes2 = [
+        (151, 591),
+        (351, 591),
+    ]
+
+    #Textos informacoes
+    textos_informacoes = []
+    textos_informacoes2 = []
+    for personagem in personagens_objetos:
+        textos_informacoes.append(fonte.render((f"{personagem.get_nome()}  {personagem.get_vida()} / {personagem.get_max_vida()}"), True, (255, 255, 255)))
+        textos_informacoes2.append(fonte.render((f"{personagem.get_nome()}  {personagem.get_vida()} / {personagem.get_max_vida()}"), True, (0, 0, 0))) #Borda
+
+    textos_informacoes_posicao = [
+        (700, 510),
+        (700, 590),
+        (700, 670),
+    ]
+    #Borda
+    textos_informacoes_posicao2 = [
+        (701, 511),
+        (701, 591),
+        (701, 671),
+    ]
+
+    #Setinha de escolha
+    seta = pygame.image.load("./imgs/UI/introcomp_seta_cortada.png")
+    seta = pygame.transform.scale(seta, (30, 30))
+    seta = pygame.transform.rotate(seta, 90)
+
+    seta_posicoes_acoes = [
+        (118, 590),
+        (315, 590),
+    ]
+
+    if not hasattr(desenha_jogo, "indice_seta_acoes"):
+        desenha_jogo.indice_seta_acoes = 0  # Inicializa o indice da seta de ações
+        desenha_jogo.acao_escolhida = None  # Inicializa a ação escolhida
+
+    # Escolha da ação
+    desenha_jogo.acao_escolhida, desenha_jogo.indice_seta_acoes = escolhe_acao(
+        seta_posicoes_acoes, desenha_jogo.indice_seta_acoes, eventos
+    )
+
+    # Verifica se uma ação foi escolhida e realiza algo (ALTERAR AQUI DENTRO PARA QUANDO O USUARIO ESCOLHER ALGO)
+    if desenha_jogo.acao_escolhida is not None:
+        print(f"Ação escolhida: {desenha_jogo.acao_escolhida}")
+        pass
+
     # Desenhos na tela
     janela.blit(menu_acoes, (0, 450))
     janela.blit(menu_info, (665, 450))
+    janela.blit(seta, seta_posicoes_acoes[desenha_jogo.indice_seta_acoes])
 
     for i in range(3):
         personagens_objetos[i].set_posicao(personagem_posicoes[i])
         personagens_objetos[i].desenha_personagem(janela)
+        janela.blit(textos_informacoes2[i], textos_informacoes_posicao2[i]) #BORDA
+        janela.blit(textos_informacoes[i], textos_informacoes_posicao[i])
+
+
+    for i in range(2):
+        janela.blit(textos_acoes2[i], textos_posicoes_acoes2[i]) #BORDA
+        janela.blit(textos_acoes[i], textos_posicoes_acoes[i])
 
     return False
