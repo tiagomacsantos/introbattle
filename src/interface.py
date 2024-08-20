@@ -1,4 +1,6 @@
 import pygame
+from personagens import Paladin, Rogue, Wizard, Hunter, Priest, Caveira, Necromancer
+import random
 
 class Window():
 
@@ -39,8 +41,6 @@ def escolhe_personagem(escolhas, seta_posicoes, indice_seta, eventos):
 
     return escolhas, indice_seta
 
-    
-# FALTA FAZER E DESENHAR A LOGICA DA SETA E ESCREVER OS NOMES DOS BONECOS
 def desenha_menu(janela, eventos):
     # Título do introbattle
     fonte = pygame.font.Font('freesansbold.ttf', 50)  # Declaração da fonte
@@ -176,39 +176,71 @@ def desenha_jogo(janela, eventos, escolhas):
     menu_info = pygame.image.load("./imgs/UI/introcomp_menu_cortado2.png")
     menu_info = pygame.transform.scale(menu_info, menu_info_tamanho)
 
-    #Carregamento dos personagens
-    personagens_lista = [
-        pygame.image.load("./imgs/personagens/paladin.png"), #paladin
-        pygame.image.load("./imgs/personagens/rogue.png"),   #rogue
-        pygame.image.load("./imgs/personagens/wizard.png"),  #wizard
-        pygame.image.load("./imgs/personagens/hunter.png"),  #hunter
-        pygame.image.load("./imgs/personagens/priest.png"),  #priest
+    #Fontes do menu UI
+    fonte = pygame.font.Font('freesansbold.ttf', 30)
+    texto_ataque = fonte.render("ATACAR", True, (255, 255, 255))
+    texto_defesa = fonte.render("DEFENDER", True, (255, 255, 255))
+    texto_skill = fonte.render("SKILL", True, (255, 255, 255))
+    texto_insight = fonte.render("INSIGHT", True, (255, 255, 255))
+
+    textos = [
+        texto_ataque,
+        texto_defesa,
+        texto_insight,
+        texto_skill,
     ]
-    personagens_lista[2] = pygame.transform.flip(personagens_lista[2], True, False) #Invertendo a imagem
 
-    personagens_escolhidos = []
+    #MEXER AQUI PELO AMOR DE DEUS
+    textos_posicoes = [
+        (170, 550),
+        (370, 550),
+        (170, 650),
+        (370, 650),
+    ]
 
-    for j in range(5): #Passando as sprites dos personagens que foram escolhidos para uma nova lista
-        if j in escolhas:
-            personagens_escolhidos.append(personagens_lista[j])
+    for i in range(4):
+        janela.blit(textos[i], textos_posicoes[i])
 
-    personagem_tamanho = (100, 100)
-
+    #Instanciando os objetos dos personagens e suas respectivas classes
     personagem_posicoes = [
         (300, 150),
         (200, 250),
         (300, 350),
     ]
 
+    personagens_objetos = []
 
-    #Desenhos na tela
+    for i in escolhas:
+        match i:
+            case 0:
+                personagens_objetos.append(Paladin())
+            case 1:
+                personagens_objetos.append(Rogue())
+            case 2:
+                personagens_objetos.append(Wizard())
+            case 3:
+                personagens_objetos.append(Hunter())
+            case 4:
+                personagens_objetos.append(Priest())
+
+    # Verifica se os inimigos já foram instanciados
+    if not hasattr(desenha_jogo, "inimigos_instanciados"):
+        desenha_jogo.inimigos_instanciados = [
+            Caveira(),
+            Necromancer()
+        ]
+        desenha_jogo.inimigo1 = random.choice(desenha_jogo.inimigos_instanciados)
+        desenha_jogo.inimigo2 = random.choice(desenha_jogo.inimigos_instanciados)
+
+    inimigo1 = desenha_jogo.inimigo1
+    inimigo2 = desenha_jogo.inimigo2
+
+    # Desenhos na tela
     janela.blit(menu_acoes, (0, 450))
     janela.blit(menu_info, (665, 450))
 
     for i in range(3):
-        personagem_escolhido = pygame.transform.scale(personagens_escolhidos[i], personagem_tamanho)
-        janela.blit(personagem_escolhido, personagem_posicoes[i])
+        personagens_objetos[i].set_posicao(personagem_posicoes[i])
+        personagens_objetos[i].desenha_personagem(janela)
 
     return False
-
-    
