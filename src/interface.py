@@ -186,6 +186,16 @@ def desenha_menu(janela, eventos):
     
     return True, desenha_menu.escolhas
 
+def define_ordem_ataque(personagens, inimigo1, inimigo2):
+    lista_ordenada = [inimigo1, inimigo2]
+
+    for i in range(len(personagens)):
+        lista_ordenada.append(personagens[i])
+
+    lista_ordenada.sort(key=lambda entidade: entidade.get_velocidade(), reverse=True)
+
+    return lista_ordenada
+
 def desenha_jogo(janela, eventos, escolhas):
 
     # Carregamento das imagens de UI
@@ -231,8 +241,14 @@ def desenha_jogo(janela, eventos, escolhas):
     inimigo1 = desenha_jogo.inimigo1
     inimigo2 = desenha_jogo.inimigo2
 
+    inimigos_posicoes = [
+        (750, 200),
+        (630, 320),
+    ]
+
     #Fonte do menu UI
     fonte = pygame.font.Font('freesansbold.ttf', 30)
+    fonte_inimigos = pygame.font.Font('freesansbold.ttf', 20)
 
     textos_acoes = [
         fonte.render("ATACAR", True, (255, 255, 255)),
@@ -244,7 +260,6 @@ def desenha_jogo(janela, eventos, escolhas):
         fonte.render("DEFENDER", True, (0, 0, 0)),
     ]
 
-    #MEXER AQUI PELO AMOR DE DEUS
     textos_posicoes_acoes = [
         (150, 590),
         (350, 590),
@@ -253,6 +268,16 @@ def desenha_jogo(janela, eventos, escolhas):
     textos_posicoes_acoes2 = [
         (151, 591),
         (351, 591),
+    ]
+
+    #Vida dos inimigos
+    texto_inimigos = [
+        fonte_inimigos.render((f"{inimigo1.get_vida()} / {inimigo1.get_max_vida()}"), True, (255, 255, 255)),
+        fonte_inimigos.render((f"{inimigo2.get_vida()} / {inimigo2.get_max_vida()}"), True, (255, 255, 255)),
+    ]
+    texto_inimigos_posicoes = [
+        (758, 305),
+        (638, 425),
     ]
 
     #Textos informacoes
@@ -293,10 +318,33 @@ def desenha_jogo(janela, eventos, escolhas):
         seta_posicoes_acoes, desenha_jogo.indice_seta_acoes, eventos
     )
 
-    # Verifica se uma ação foi escolhida e realiza algo (ALTERAR AQUI DENTRO PARA QUANDO O USUARIO ESCOLHER ALGO)
+    lista_ordem_ataque = define_ordem_ataque(personagens_objetos, inimigo1, inimigo2)
+
+    # Verifica se um turno já foi definido
+    if not hasattr(desenha_jogo, "indice_turno"):
+        desenha_jogo.indice_turno = 0  # Inicializa o índice do turno
+
+    # Determina o personagem da vez
+    personagem_turno = lista_ordem_ataque[desenha_jogo.indice_turno]
+
+    # Exibe o nome do personagem que está jogando
+    texto_turno = fonte.render(f"TURNO DO {personagem_turno.get_nome().upper()}!", True, (255, 255, 255))
+    texto_turno2 = fonte.render(f"TURNO DO {personagem_turno.get_nome().upper()}!", True, (0, 0, 0))
+    texto_turno_posicao = (150, 520)
+    texto_turno_posicao2 = (151, 521) #Borda
+
+    #Posicoes das setas para quando for atacar os inimigos
+    seta_inimigos_posicoes = [
+        (710, 250),
+        (590, 370),
+    ]
+
+    # Verifica se uma ação foi escolhida e avança o turno
     if desenha_jogo.acao_escolhida is not None:
-        print(f"Ação escolhida: {desenha_jogo.acao_escolhida}")
-        pass
+        # Aqui você pode implementar o efeito da ação
+        desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
+        desenha_jogo.acao_escolhida = None  # Reseta a ação escolhida para o próximo turno
+        
 
     # Desenhos na tela
     janela.blit(menu_acoes, (0, 450))
@@ -313,5 +361,12 @@ def desenha_jogo(janela, eventos, escolhas):
     for i in range(2):
         janela.blit(textos_acoes2[i], textos_posicoes_acoes2[i]) #BORDA
         janela.blit(textos_acoes[i], textos_posicoes_acoes[i])
+        janela.blit(texto_inimigos[i], texto_inimigos_posicoes[i])
+
+    janela.blit(texto_turno2, texto_turno_posicao2)
+    janela.blit(texto_turno, texto_turno_posicao)
+
+    janela.blit(inimigo1.get_image(), inimigos_posicoes[0])
+    janela.blit(inimigo2.get_image(), inimigos_posicoes[1])  
 
     return False
