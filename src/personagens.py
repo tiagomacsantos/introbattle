@@ -16,6 +16,8 @@ class Personagem(pygame.sprite.Sprite):
 
     def atualizar_vida(self, dano_recebido):
         self.vida -= dano_recebido
+        if self.vida < 0:
+            self.vida = 0
 
     def atacar(self, defesa_inimigo):
         dano = self.ataque * (50/(50 + defesa_inimigo))
