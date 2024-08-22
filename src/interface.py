@@ -321,8 +321,13 @@ def desenha_jogo(janela, eventos, escolhas):
     if not hasattr(desenha_jogo, "indice_turno"):
         desenha_jogo.indice_turno = 0  # Inicializa o índice do turno
 
-    # Determina o personagem da vez, 
+    # Determina o personagem da vez
     personagem_turno = lista_ordem_ataque[desenha_jogo.indice_turno]
+
+    #Pula o turno caso o personagem esteja morto
+    while not personagem_turno.esta_vivo() or (personagem_turno.get_nome() in ["CAVEIRA", "NECROMANCER"]):
+        desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
+        personagem_turno = lista_ordem_ataque[desenha_jogo.indice_turno]
 
     # Exibe o nome do personagem que está jogando
     texto_turno = fonte.render(f"TURNO DO {personagem_turno.get_nome().upper()}!", True, (255, 255, 255))
@@ -341,15 +346,14 @@ def desenha_jogo(janela, eventos, escolhas):
         # Aqui você pode implementar o efeito da ação
         desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
         while lista_ordem_ataque[desenha_jogo.indice_turno].get_nome() == "CAVEIRA" or lista_ordem_ataque[desenha_jogo.indice_turno].get_nome() == "NECROMANCER":
-        # Encontra o personagem jogável com a maior vida
-            menor_vida = 10000
+            # Encontra o personagem jogável com a menor vida (o mais fraco)
+            menor_vida = float('inf')
             alvo = None
             for personagem in desenha_jogo.personagens_objetos:
-                if personagem.vida < menor_vida:
-                    menor_vida = personagem.vida
+                if personagem.get_vida() > 0 and personagem.get_vida() < menor_vida:
+                    menor_vida = personagem.get_vida()
                     alvo = personagem
-
-            # Realiza o ataque no personagem com maior vida
+            # Realiza o ataque no personagem encontrado
             if alvo is not None:
                 dano = lista_ordem_ataque[desenha_jogo.indice_turno].atacar(alvo.get_defesa())
                 print(f"Dano causado: {dano}")
@@ -396,4 +400,4 @@ def desenha_jogo(janela, eventos, escolhas):
     janela.blit(inimigo1.get_image(), inimigos_posicoes[0])
     janela.blit(inimigo2.get_image(), inimigos_posicoes[1])  
 
-    return False
+    return False, False
