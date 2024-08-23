@@ -1,6 +1,5 @@
 import pygame
 from personagens import Paladin, Rogue, Wizard, Hunter, Priest, Caveira, Necromancer
-import random
 
 class Window():
 
@@ -26,7 +25,7 @@ def venceu_tela():
     #DESENHOS NA TELA PARA QUANDO O PLAYER GANHAR
     return True, True
 
-def realiza_ataque(personagem_atacante, seta_inimigos_posicoes, inimigos, janela, seta, acao_flag, eventos):
+def realiza_ataque(seta_inimigos_posicoes, inimigos, janela, seta, acao_flag, eventos):
     if not hasattr(realiza_ataque, "indice_seta"):
             realiza_ataque.indice_seta = 0 # Começa com o primeiro inimigo como alvo
     alvo_selecionado = False
@@ -40,8 +39,10 @@ def realiza_ataque(personagem_atacante, seta_inimigos_posicoes, inimigos, janela
             elif event.key == pygame.K_LEFT:
                 realiza_ataque.indice_seta = (realiza_ataque.indice_seta - 1) % len(inimigos)
                 acao_flag = True
-            elif event.key == pygame.K_z:
+            elif event.key == pygame.K_z and inimigos[realiza_ataque.indice_seta].esta_vivo():
                 alvo_selecionado = True
+                acao_flag = False
+            elif event.key == pygame.K_x:
                 acao_flag = False
 
     janela.blit(seta, seta_inimigos_posicoes[realiza_ataque.indice_seta])
@@ -374,14 +375,18 @@ def desenha_jogo(janela, eventos, escolhas):
         (590, 370),
     ]
 
+    alvo_foi_escolhido = False
     # Verifica se uma ação foi escolhida e avança o turno
     if desenha_jogo.acao_escolhida is not None:
         if desenha_jogo.acao_escolhida == 0:
-            seta_indice_inimigos, alvo_foi_escolhido, desenha_jogo.acao_flag = realiza_ataque(personagem_turno, seta_inimigos_posicoes, inimigos, janela, seta, desenha_jogo.acao_flag, eventos)
+            seta_indice_inimigos, alvo_foi_escolhido, desenha_jogo.acao_flag = realiza_ataque(seta_inimigos_posicoes, inimigos, janela, seta, desenha_jogo.acao_flag, eventos)
             if alvo_foi_escolhido == True:
-                inimigo = inimigos[seta_indice_inimigos]
-                dano = personagem_turno.atacar(inimigo.get_defesa())
-                inimigo.atualizar_vida(dano)
+                if inimigos[seta_indice_inimigos].esta_vivo():
+                    inimigo = inimigos[seta_indice_inimigos]
+                    dano = personagem_turno.atacar(inimigo.get_defesa())  #PRECISO ACHAR UM JEITO DE FAZER COM QUE OS INIMIGOS E SUAS SETAS NAO SEJAM INSTANCIADOS A CADA ITERACAO
+                    inimigo.atualizar_vida(dano)
+                else:
+                    pass
         elif desenha_jogo.acao_escolhida == 1:
             pass     
 
@@ -418,8 +423,8 @@ def desenha_jogo(janela, eventos, escolhas):
     janela.blit(inimigo1.get_image(), inimigos_posicoes[0])
     janela.blit(inimigo2.get_image(), inimigos_posicoes[1])  
 
-    #PROVAVELMENTE TA AQUI O ERRO
-    if desenha_jogo.acao_escolhida == True:
+    # So passa o turno se o alvo foi escolhido ou a acao escolhida foi defender (por enquanto)
+    if alvo_foi_escolhido == True or desenha_jogo.acao_escolhida == 1:
         desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
 
     # Inimigos atacando    
