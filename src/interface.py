@@ -18,6 +18,36 @@ class Window():
     def get_color(self):
         return self.color
     
+def game_over_tela():
+    #DESENHOS NA TELA PARA QUANDO O PLAYER PERDER
+    return False, False
+
+def venceu_tela():
+    #DESENHOS NA TELA PARA QUANDO O PLAYER GANHAR
+    return True, True
+
+def realiza_ataque(personagem_atacante, seta_inimigos_posicoes, inimigos, janela, seta, acao_flag, eventos):
+    if not hasattr(realiza_ataque, "indice_seta"):
+            realiza_ataque.indice_seta = 0 # Começa com o primeiro inimigo como alvo
+    alvo_selecionado = False
+    acao_flag = True
+    
+    for event in eventos:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                realiza_ataque.indice_seta = (realiza_ataque.indice_seta + 1) % len(inimigos)
+                acao_flag = True
+            elif event.key == pygame.K_LEFT:
+                realiza_ataque.indice_seta = (realiza_ataque.indice_seta - 1) % len(inimigos)
+                acao_flag = True
+            elif event.key == pygame.K_z:
+                alvo_selecionado = True
+                acao_flag = False
+
+    janela.blit(seta, seta_inimigos_posicoes[realiza_ataque.indice_seta])
+
+    return realiza_ataque.indice_seta, alvo_selecionado, acao_flag
+    
 def escolhe_personagem(escolhas, seta_posicoes, indice_seta, eventos):
     #Verifica pressionamento de teclas
     for event in eventos:
@@ -51,7 +81,7 @@ def escolhe_acao(seta_posicoes_acoes, indice_seta, eventos):
                 indice_seta += 1  # Move para a direita
             elif event.key == pygame.K_LEFT:
                 indice_seta -= 1  # Move para a esquerda
-            elif event.key == pygame.K_z:
+            elif event.key == pygame.K_c:
                 acao_escolhida = indice_seta  # Seleciona a ação atual
 
     # Mantém o índice da seta dentro dos limites
@@ -239,11 +269,16 @@ def desenha_jogo(janela, eventos, escolhas):
             Caveira(),
             Necromancer()
         ]
-        desenha_jogo.inimigo1 = random.choice(desenha_jogo.inimigos_instanciados)
-        desenha_jogo.inimigo2 = random.choice(desenha_jogo.inimigos_instanciados)
+        desenha_jogo.inimigo1 = desenha_jogo.inimigos_instanciados[1]
+        desenha_jogo.inimigo2 = desenha_jogo.inimigos_instanciados[0]
 
     inimigo1 = desenha_jogo.inimigo1
     inimigo2 = desenha_jogo.inimigo2
+
+    inimigos = [
+        inimigo1,
+        inimigo2,
+    ]
 
     inimigos_posicoes = [
         (750, 200),
@@ -276,8 +311,8 @@ def desenha_jogo(janela, eventos, escolhas):
 
     #Vida dos inimigos
     texto_inimigos = [
-        fonte_inimigos.render((f"{inimigo1.get_vida()} / {inimigo1.get_max_vida()}"), True, (255, 255, 255)),
-        fonte_inimigos.render((f"{inimigo2.get_vida()} / {inimigo2.get_max_vida()}"), True, (255, 255, 255)),
+        fonte_inimigos.render((f"{int(inimigo1.get_vida())} / {inimigo1.get_max_vida()}"), True, (255, 255, 255)),
+        fonte_inimigos.render((f"{int(inimigo2.get_vida())} / {inimigo2.get_max_vida()}"), True, (255, 255, 255)),
     ]
     texto_inimigos_posicoes = [
         (758, 305),
@@ -309,11 +344,14 @@ def desenha_jogo(janela, eventos, escolhas):
     if not hasattr(desenha_jogo, "indice_seta_acoes"):
         desenha_jogo.indice_seta_acoes = 0  # Inicializa o indice da seta de ações
         desenha_jogo.acao_escolhida = None  # Inicializa a ação escolhida
+    
+    if not hasattr(desenha_jogo, "acao_flag"):
+        desenha_jogo.acao_flag = False
 
     # Escolha da ação
-    desenha_jogo.acao_escolhida, desenha_jogo.indice_seta_acoes = escolhe_acao(
-        seta_posicoes_acoes, desenha_jogo.indice_seta_acoes, eventos
-    )
+    if desenha_jogo.acao_flag == False:
+        desenha_jogo.acao_escolhida, desenha_jogo.indice_seta_acoes = escolhe_acao(seta_posicoes_acoes, desenha_jogo.indice_seta_acoes, eventos)
+        
 
     lista_ordem_ataque = define_ordem_ataque(desenha_jogo.personagens_objetos, inimigo1, inimigo2)
 
@@ -323,11 +361,6 @@ def desenha_jogo(janela, eventos, escolhas):
 
     # Determina o personagem da vez
     personagem_turno = lista_ordem_ataque[desenha_jogo.indice_turno]
-
-    #Pula o turno caso o personagem esteja morto
-    while not personagem_turno.esta_vivo() or (personagem_turno.get_nome() in ["CAVEIRA", "NECROMANCER"]):
-        desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
-        personagem_turno = lista_ordem_ataque[desenha_jogo.indice_turno]
 
     # Exibe o nome do personagem que está jogando
     texto_turno = fonte.render(f"TURNO DO {personagem_turno.get_nome().upper()}!", True, (255, 255, 255))
@@ -343,9 +376,55 @@ def desenha_jogo(janela, eventos, escolhas):
 
     # Verifica se uma ação foi escolhida e avança o turno
     if desenha_jogo.acao_escolhida is not None:
-        # Aqui você pode implementar o efeito da ação
+        if desenha_jogo.acao_escolhida == 0:
+            seta_indice_inimigos, alvo_foi_escolhido, desenha_jogo.acao_flag = realiza_ataque(personagem_turno, seta_inimigos_posicoes, inimigos, janela, seta, desenha_jogo.acao_flag, eventos)
+            if alvo_foi_escolhido == True:
+                inimigo = inimigos[seta_indice_inimigos]
+                dano = personagem_turno.atacar(inimigo.get_defesa())
+                inimigo.atualizar_vida(dano)
+        elif desenha_jogo.acao_escolhida == 1:
+            pass     
+
+    #Textos informacoes
+    textos_informacoes = []
+    textos_informacoes2 = []
+    for personagem in desenha_jogo.personagens_objetos:
+        textos_informacoes.append(fonte.render((f"{personagem.get_nome()}  {int(personagem.get_vida())} / {personagem.get_max_vida()}"), True, (255, 255, 255)))
+        textos_informacoes2.append(fonte.render((f"{personagem.get_nome()}  {int(personagem.get_vida())} / {personagem.get_max_vida()}"), True, (0, 0, 0))) #Borda
+
+    # Desenhos na tela
+    janela.blit(menu_acoes, (0, 450))
+    janela.blit(menu_info, (665, 450))
+    if desenha_jogo.acao_flag == False:
+        janela.blit(seta, seta_posicoes_acoes[desenha_jogo.indice_seta_acoes])
+
+    for i in range(3):
+        if desenha_jogo.personagens_objetos[i].esta_vivo():  # Verifica se o personagem está vivo
+            desenha_jogo.personagens_objetos[i].set_posicao(personagem_posicoes[i])
+            desenha_jogo.personagens_objetos[i].desenha_personagem(janela)
+        # Desenha informações apenas para personagens vivos
+        janela.blit(textos_informacoes2[i], textos_informacoes_posicao2[i])  # Borda
+        janela.blit(textos_informacoes[i], textos_informacoes_posicao[i])
+
+
+    for i in range(2):
+        janela.blit(textos_acoes2[i], textos_posicoes_acoes2[i]) #BORDA
+        janela.blit(textos_acoes[i], textos_posicoes_acoes[i])
+        janela.blit(texto_inimigos[i], texto_inimigos_posicoes[i])
+
+    janela.blit(texto_turno2, texto_turno_posicao2)
+    janela.blit(texto_turno, texto_turno_posicao)
+
+    janela.blit(inimigo1.get_image(), inimigos_posicoes[0])
+    janela.blit(inimigo2.get_image(), inimigos_posicoes[1])  
+
+    #PROVAVELMENTE TA AQUI O ERRO
+    if desenha_jogo.acao_escolhida == True:
         desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
-        while lista_ordem_ataque[desenha_jogo.indice_turno].get_nome() == "CAVEIRA" or lista_ordem_ataque[desenha_jogo.indice_turno].get_nome() == "NECROMANCER":
+
+    # Inimigos atacando    
+    while lista_ordem_ataque[desenha_jogo.indice_turno].get_nome() in ["CAVEIRA", "NECROMANCER"] or not lista_ordem_ataque[desenha_jogo.indice_turno].esta_vivo():
+        if lista_ordem_ataque[desenha_jogo.indice_turno].get_nome() in ["CAVEIRA", "NECROMANCER"]:
             # Encontra o personagem jogável com a menor vida (o mais fraco)
             menor_vida = float('inf')
             alvo = None
@@ -362,42 +441,12 @@ def desenha_jogo(janela, eventos, escolhas):
 
             # Passa para o próximo turno
             desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
-
-        desenha_jogo.acao_escolhida = None  # Reseta a ação escolhida para o próximo turno
-        
-
-    #Textos informacoes
-    textos_informacoes = []
-    textos_informacoes2 = []
-    for personagem in desenha_jogo.personagens_objetos:
-        textos_informacoes.append(fonte.render((f"{personagem.get_nome()}  {int(personagem.get_vida())} / {personagem.get_max_vida()}"), True, (255, 255, 255)))
-        textos_informacoes2.append(fonte.render((f"{personagem.get_nome()}  {int(personagem.get_vida())} / {personagem.get_max_vida()}"), True, (0, 0, 0))) #Borda
-
-    # Desenhos na tela
-    janela.blit(menu_acoes, (0, 450))
-    janela.blit(menu_info, (665, 450))
-    janela.blit(seta, seta_posicoes_acoes[desenha_jogo.indice_seta_acoes])
-
-    for i in range(3):
-        if desenha_jogo.personagens_objetos[i].esta_vivo():  # Verifica se o personagem está vivo
-            desenha_jogo.personagens_objetos[i].set_posicao(personagem_posicoes[i])
-            desenha_jogo.personagens_objetos[i].desenha_personagem(janela)
         else:
-            lista_ordem_ataque.remove(desenha_jogo.personagens_objetos[i])
-        # Desenha informações apenas para personagens vivos
-        janela.blit(textos_informacoes2[i], textos_informacoes_posicao2[i])  # Borda
-        janela.blit(textos_informacoes[i], textos_informacoes_posicao[i])
+            desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
 
+        jogaveis_vivos = any(personagem.esta_vivo() for personagem in desenha_jogo.personagens_objetos)
 
-    for i in range(2):
-        janela.blit(textos_acoes2[i], textos_posicoes_acoes2[i]) #BORDA
-        janela.blit(textos_acoes[i], textos_posicoes_acoes[i])
-        janela.blit(texto_inimigos[i], texto_inimigos_posicoes[i])
-
-    janela.blit(texto_turno2, texto_turno_posicao2)
-    janela.blit(texto_turno, texto_turno_posicao)
-
-    janela.blit(inimigo1.get_image(), inimigos_posicoes[0])
-    janela.blit(inimigo2.get_image(), inimigos_posicoes[1])  
+        if not jogaveis_vivos:
+            return True, False
 
     return False, False

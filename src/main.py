@@ -17,6 +17,7 @@ pygame.display.set_caption("IntroBattle!")
 run = True
 menu_principal = True
 game_over = False
+venceu = False
 fps = 60
 
 #imagem de fundo do jogo
@@ -41,7 +42,13 @@ while run:
     if menu_principal:
         menu_principal, escolhas = interface.desenha_menu(win, eventos)
     else:
-        menu_principal, game_over = interface.desenha_jogo(win, eventos, escolhas)
+        game_over, venceu = interface.desenha_jogo(win, eventos, escolhas)
+        if game_over == True:
+            escolhas.clear()
+            menu_principal, run = interface.game_over_tela()
+        elif venceu == True:
+            escolhas.clear()
+            menu_principal, run = interface.venceu_tela()
     
     #atualiza o display da tela
     pygame.display.flip()
