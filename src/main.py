@@ -39,21 +39,19 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
+    if game_over == True:
+        escolhas.clear()
+        interface.game_over_tela(eventos, win)
+    if venceu == True:
+        escolhas.clear()
+        venceu, menu_principal, run = interface.venceu_tela(eventos, win)
+    
     if menu_principal:
         menu_principal, escolhas = interface.desenha_menu(win, eventos)
-    else:
+    elif not venceu and not menu_principal and run:
         game_over, venceu = interface.desenha_jogo(win, eventos, escolhas)
-        if game_over == True:
-            escolhas.clear()
-            menu_principal, run = interface.game_over_tela()
-        elif venceu == True:
-            escolhas.clear()
-            menu_principal, run = interface.venceu_tela()
     
     #atualiza o display da tela
     pygame.display.flip()
-
-    
-
 
 pygame.quit()
