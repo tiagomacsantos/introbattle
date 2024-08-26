@@ -17,28 +17,79 @@ class Window():
     def get_color(self):
         return self.color
     
-def escolhe_opcao(eventos, seta_posicoes):
-    
-    if not hasattr(escolhe_opcao, "indice_seta"):
-        escolhe_opcao.indice_seta = 0
+def escolhe_opcao(eventos):
     
     acao_escolhida = False
 
     for event in eventos:
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                escolhe_opcao.indice_seta = (escolhe_opcao.indice_seta + 1) % len(seta_posicoes)
-            elif event.key == pygame.K_LEFT:
-                escolhe_opcao.indice_seta = (escolhe_opcao.indice_seta - 1) % len(seta_posicoes)
-            elif event.key == pygame.K_c:
+            if event.key == pygame.K_c:
                 acao_escolhida = True
+        elif event.type == pygame.QUIT:
+            pygame.quit()
 
-    return escolhe_opcao.indice_seta, acao_escolhida
+    return acao_escolhida
 
     
-def game_over_tela(eventos):
-    print("to passando aqui")
-    return False, False
+def game_over_tela(eventos, janela):
+    
+    inimigos = [
+        pygame.image.load("./imgs/personagens/necromancer.png"),
+        pygame.image.load("./imgs/personagens/caveira.png"),
+    ]
+    inimigos = [pygame.transform.scale(personagem, (150, 150)) for personagem in inimigos]
+    inimigos = [pygame.transform.flip(personagem, True, False) for personagem in inimigos]
+
+    inimigos_posicoes = [
+        (335, 310),
+        (550, 310),
+    ]
+
+    menu_rect = pygame.image.load("./imgs/UI/introcomp_menu_cortado2.png")
+    seta = pygame.image.load("./imgs/UI/introcomp_seta_cortada.png")
+
+    menu_rect = pygame.transform.scale(menu_rect, (700, 700))
+    seta = pygame.transform.scale(seta, (30, 30))
+
+    seta_posicao = (495, 530)
+  
+    acao_escolhida = False
+
+    acao_escolhida = escolhe_opcao(eventos)
+
+    fonte = pygame.font.Font('freesansbold.ttf', 35)
+    fonte_maior = pygame.font.Font('freesansbold.ttf', 70)
+
+    text = fonte_maior.render("GAME OVER", True, (255, 255, 255))
+    text_borda = fonte_maior.render("GAME OVER", True, (0, 0, 0))
+
+    text_posicoes = [
+        (295, 150),
+        (296, 151),
+    ]
+
+    sair = fonte.render("SAIR", True, (255, 255, 255))
+    sair_borda = fonte.render("SAIR", True, (0, 0, 0))
+
+    sair_posicoes = [
+        (465, 570),
+        (466, 571),
+    ]
+
+    #Desenhos na tela
+    janela.blit(menu_rect, (168.5, 25))
+    janela.blit(text_borda, text_posicoes[1]) 
+    janela.blit(text, text_posicoes[0])  
+    janela.blit(sair_borda, sair_posicoes[1])
+    janela.blit(sair, sair_posicoes[0])
+    janela.blit(seta, seta_posicao)
+    for i in range(len(inimigos)):
+        janela.blit(inimigos[i], inimigos_posicoes[i])
+
+    if acao_escolhida == True:
+        return False, False, False
+    else:
+        return True, False, True
 
 def venceu_tela(eventos, janela):
 
@@ -67,14 +118,11 @@ def venceu_tela(eventos, janela):
     menu_rect = pygame.transform.scale(menu_rect, (700, 700))
     seta = pygame.transform.scale(seta, (30, 30))
 
-    seta_posicoes = [
-        (345, 525),
-        (650, 525),
-    ]
-
+    seta_posicao = (495, 530)
+  
     acao_escolhida = False
 
-    seta_indice, acao_escolhida = escolhe_opcao(eventos, seta_posicoes)
+    acao_escolhida = escolhe_opcao(eventos)
 
     fonte = pygame.font.Font('freesansbold.ttf', 35)
     fonte_maior = pygame.font.Font('freesansbold.ttf', 50)
@@ -82,42 +130,30 @@ def venceu_tela(eventos, janela):
     text = fonte_maior.render("Parabens, você venceu!", True, (255, 255, 255))
     text_borda = fonte_maior.render("Parabens, você venceu!", True, (0, 0, 0))
     text_posicoes = [
-        (215, 120),
-        (216, 121),
-    ]
-
-    reiniciar = fonte.render("REINICIAR", True, (255, 255, 255))
-    reiniciar_borda = fonte.render("REINICIAR", True, (0, 0, 0))
-    reiniciar_posicoes = [
-        (270, 560),
-        (271, 561),
+        (215, 140),
+        (216, 141),
     ]
 
     sair = fonte.render("SAIR", True, (255, 255, 255))
     sair_borda = fonte.render("SAIR", True, (0, 0, 0))
 
     sair_posicoes = [
-        (620, 560),
-        (621, 560),
+        (465, 570),
+        (466, 571),
     ]
 
     #Desenhos na tela
     janela.blit(menu_rect, (168.5, 25))
     janela.blit(text_borda, text_posicoes[1]) 
     janela.blit(text, text_posicoes[0])  
-    janela.blit(reiniciar_borda, reiniciar_posicoes[1])
-    janela.blit(reiniciar, reiniciar_posicoes[0])
     janela.blit(sair_borda, sair_posicoes[1])
     janela.blit(sair, sair_posicoes[0])
-    janela.blit(seta, seta_posicoes[seta_indice])
+    janela.blit(seta, seta_posicao)
     for i in range(len(personagens)):
         janela.blit(personagens[i], personagens_posicoes[i])
 
     if acao_escolhida == True:
-        if seta_indice == 0:
-            return False, True, True
-        else:
-            return False, False, False
+        return False, False, False
     else:
         return True, False, True
 

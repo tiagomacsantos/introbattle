@@ -41,14 +41,14 @@ while run:
 
     if game_over == True:
         escolhas.clear()
-        interface.game_over_tela(eventos, win)
+        game_over, menu_principal, run = interface.game_over_tela(eventos, win)
     if venceu == True:
         escolhas.clear()
         venceu, menu_principal, run = interface.venceu_tela(eventos, win)
     
     if menu_principal:
         menu_principal, escolhas = interface.desenha_menu(win, eventos)
-    elif not venceu and not menu_principal and run:
+    elif (run and not venceu) and (run and not game_over):
         game_over, venceu = interface.desenha_jogo(win, eventos, escolhas)
     
     #atualiza o display da tela
