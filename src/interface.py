@@ -1,6 +1,16 @@
 import pygame
 from personagens import Paladin, Rogue, Wizard, Hunter, Priest, Caveira, Necromancer
 
+pygame.mixer.init()
+
+som_defesa = pygame.mixer.Sound("./sounds/som_defesa.wav")
+som_ataque = pygame.mixer.Sound("./sounds/som_ataque.wav")
+som_morreu = pygame.mixer.Sound("./sounds/som_morreu.wav")
+passa_opcao = pygame.mixer.Sound("./sounds/passa_opcao.wav")
+escolhe_opcao_som = pygame.mixer.Sound("./sounds/escolhe_opcao.wav")
+ganhou_som = pygame.mixer.Sound("./sounds/ganhou_som.wav")
+perdeu_som = pygame.mixer.Sound("./sounds/perdeu.wav")
+
 class Window():
 
     width = 0
@@ -29,8 +39,7 @@ def escolhe_opcao(eventos):
             pygame.quit()
 
     return acao_escolhida
-
-    
+  
 def game_over_tela(eventos, janela):
     
     inimigos = [
@@ -157,7 +166,6 @@ def venceu_tela(eventos, janela):
     else:
         return True, False, True
 
-
 def realiza_ataque(seta_inimigos_posicoes, inimigos, janela, seta, acao_flag, eventos):
     if not hasattr(realiza_ataque, "indice_seta"):
             realiza_ataque.indice_seta = 0 # Começa com o primeiro inimigo como alvo
@@ -172,19 +180,23 @@ def realiza_ataque(seta_inimigos_posicoes, inimigos, janela, seta, acao_flag, ev
     for event in eventos:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT and len(seta_inimigos_posicoes)  > 1:
+                passa_opcao.play()
                 realiza_ataque.indice_seta = (realiza_ataque.indice_seta + 1) % len(inimigos)
                 while not inimigos[realiza_ataque.indice_seta].esta_vivo():
                     realiza_ataque.indice_seta = (realiza_ataque.indice_seta + 1) % len(inimigos)
                 acao_flag = True
             elif event.key == pygame.K_LEFT and len(seta_inimigos_posicoes) > 1:
+                passa_opcao.play()
                 realiza_ataque.indice_seta = (realiza_ataque.indice_seta - 1) % len(inimigos)
                 while not inimigos[realiza_ataque.indice_seta].esta_vivo():
                     realiza_ataque.indice_seta = (realiza_ataque.indice_seta - 1) % len(inimigos)
                 acao_flag = True
             elif event.key == pygame.K_z and inimigos[realiza_ataque.indice_seta].esta_vivo():
+                som_ataque.play()
                 alvo_selecionado = True
                 acao_flag = False
             elif event.key == pygame.K_x:
+                escolhe_opcao_som.play()
                 acao_flag = False
 
     janela.blit(seta, seta_inimigos_posicoes[realiza_ataque.indice_seta])
@@ -196,10 +208,13 @@ def escolhe_personagem(escolhas, seta_posicoes, indice_seta, eventos):
     for event in eventos:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
+                passa_opcao.play()
                 indice_seta += 1
             elif event.key == pygame.K_LEFT:
+                passa_opcao.play()
                 indice_seta -= 1
             elif event.key == pygame.K_z:
+                escolhe_opcao_som.play()
                 if indice_seta not in escolhas:
                     escolhas.append(indice_seta)
 
@@ -221,10 +236,13 @@ def escolhe_acao(seta_posicoes_acoes, indice_seta, eventos):
     for event in eventos:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
+                passa_opcao.play()
                 indice_seta += 1  # Move para a direita
             elif event.key == pygame.K_LEFT:
+                passa_opcao.play()
                 indice_seta -= 1  # Move para a esquerda
             elif event.key == pygame.K_c:
+                escolhe_opcao_som.play()
                 acao_escolhida = indice_seta  # Seleciona a ação atual
 
     # Mantém o índice da seta dentro dos limites
@@ -531,16 +549,19 @@ def desenha_jogo(janela, eventos, escolhas):
                     print(f"Personagem: {personagem_turno.get_nome()} Atacou: {inimigo.get_nome()} Causando {dano} de dano\n")
                     if not inimigo.esta_vivo():
                         # Mantenha o inimigo na lista, mas marque-o como morto
+                        som_morreu.play()
                         desenha_jogo.seta_inimigos_posicoes[seta_indice_inimigos] = (-100, -100)  # Move a seta para fora da tela
 
                     # Verifica se algum inimigo ainda está vivo
                     inimigos_vivos = any(inimigo.esta_vivo() for inimigo in inimigos)
                     # Se não houver inimigos vivos, os jogáveis venceram
                     if not inimigos_vivos:
+                        ganhou_som.play()
                         inimigos.clear()
                         return False, True
                 
         elif desenha_jogo.acao_escolhida == 1:
+            som_defesa.play()
             personagem_turno.defender()  
             personagem_turno.defendendo = True
 
@@ -609,10 +630,14 @@ def desenha_jogo(janela, eventos, escolhas):
                     alvo = personagem
             # Realiza o ataque no personagem encontrado
             if alvo is not None:
+                som_ataque.play()
                 dano = lista_ordem_ataque[desenha_jogo.indice_turno].atacar(alvo.get_defesa())
                 print(f"Dano causado: {dano}")
                 alvo.atualizar_vida(dano)  # Atualiza a vida do personagem que recebeu dano
                 print(f"Vida do alvo após dano: {alvo.get_vida()}")
+
+                if not alvo.esta_vivo():
+                    som_morreu.play()
 
             # Passa para o próximo turno
             desenha_jogo.indice_turno = (desenha_jogo.indice_turno + 1) % len(lista_ordem_ataque)
@@ -623,6 +648,7 @@ def desenha_jogo(janela, eventos, escolhas):
 
         # Se não houver jogáveis vivos, os inimigos venceram
         if not jogaveis_vivos:
+            perdeu_som.play()
             inimigos.clear()
             return True, False
         

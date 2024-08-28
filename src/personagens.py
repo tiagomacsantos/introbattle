@@ -96,7 +96,7 @@ class Inimigo(Personagem):
 
 class Caveira(Inimigo):
     def __init__(self):
-        super().__init__(vida=100, vida_inicial=100, ataque=20, defesa=10, velocidade=32, image=pygame.image.load("./imgs/personagens/caveira.png"))
+        super().__init__(vida=100, vida_inicial=100, ataque=35, defesa=10, velocidade=32, image=pygame.image.load("./imgs/personagens/caveira.png"))
         self.image = pygame.transform.flip(self.image, True, False)
         self.image = pygame.transform.scale(self.image, (100, 100))
     
@@ -105,7 +105,7 @@ class Caveira(Inimigo):
 
 class Necromancer(Inimigo): 
     def __init__(self):
-        super().__init__(vida=100, vida_inicial=100, ataque=20, defesa=10, velocidade=32, image=pygame.image.load("./imgs/personagens/necromancer.png"))
+        super().__init__(vida=100, vida_inicial=100, ataque=40, defesa=10, velocidade=15, image=pygame.image.load("./imgs/personagens/necromancer.png"))
         self.image = pygame.transform.flip(self.image, True, False)
         self.image = pygame.transform.scale(self.image, (100, 100))
     

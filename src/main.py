@@ -1,6 +1,8 @@
 import interface
 import pygame 
 
+pygame.mixer.init()
+
 pygame.init()
 
 clock = pygame.time.Clock()
@@ -11,7 +13,6 @@ w = interface.Window(1024, 768)
 #inicia a janela
 win = pygame.display.set_mode(w.get_window_size())
 pygame.display.set_caption("IntroBattle!")
-
 
 #variaveis do loop principal
 run = True
@@ -27,6 +28,13 @@ background = pygame.transform.scale(background, (1024, 768))
 #Escolhas do jogador
 escolhas = []
 
+#musica de fundo
+pygame.mixer.music.load("./sounds/musica_fundo.ogg")
+
+pygame.mixer.music.play(-1) 
+
+pygame.mixer.music.set_volume(0.3)
+
 while run:
     #desenha a imagem de fundo do jogo
     win.blit(background, (0, 0))
@@ -40,9 +48,11 @@ while run:
             run = False
 
     if game_over == True:
+        pygame.mixer.music.stop()
         escolhas.clear()
         game_over, menu_principal, run = interface.game_over_tela(eventos, win)
     if venceu == True:
+        pygame.mixer.music.stop()
         escolhas.clear()
         venceu, menu_principal, run = interface.venceu_tela(eventos, win)
     
